@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "655326028730",
+    "firebase_url": "https://taxigo-82879.firebaseio.com",
+    "project_id": "taxigo-82879",
+    "storage_bucket": "taxigo-82879.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:655326028730:android:46b81a23aa5afa4c",
+        "android_client_info": {
+          "package_name": "com.example.eunenciotovele.taxigo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "655326028730-tq5kgjmmml1ln9dvp9vtt1hagkirs1u7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.eunenciotovele.taxigo",
+            "certificate_hash": "d190ffb6e636f2b4068aa9a4717e6b7b678f5b8c"
+          }
+        },
+        {
+          "client_id": "655326028730-bnpu1av4fun2vqt86ttpjpq3veshriin.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCmwhRUZQOqKP8Mjafn9YeAjcrNJ1Kl4nI"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "655326028730-bnpu1av4fun2vqt86ttpjpq3veshriin.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
