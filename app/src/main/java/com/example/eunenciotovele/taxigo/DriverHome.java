@@ -38,6 +38,10 @@ import com.example.eunenciotovele.taxigo.Common.common;
 import com.example.eunenciotovele.taxigo.Model.Token;
 import com.example.eunenciotovele.taxigo.Model.UberDriver;
 import com.example.eunenciotovele.taxigo.Remote.IGoogleAPI;
+import com.facebook.accountkit.Account;
+import com.facebook.accountkit.AccountKit;
+import com.facebook.accountkit.AccountKitCallback;
+import com.facebook.accountkit.AccountKitError;
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.github.glomadrian.materialanimatedswitch.MaterialAnimatedSwitch;
@@ -197,6 +201,24 @@ public class DriverHome extends AppCompatActivity
     };
 
 
+
+    private float getBearing(LatLng startPosition, LatLng endPosition) {
+        double lat = Math.abs(startPosition.latitude - endPosition.latitude);
+        double lng = Math.abs(startPosition.longitude - endPosition.longitude);
+
+        if (startPosition.latitude < endPosition.latitude && startPosition.longitude < endPosition.longitude)
+            return (float) (Math.toDegrees(Math.atan(lng/lat)));
+        else if (startPosition.latitude >=  endPosition.latitude && startPosition.longitude < endPosition.longitude)
+            return (float) ((90-Math.toDegrees(Math.atan(lng/lat)))+90);
+        else if (startPosition.latitude >= endPosition.latitude && startPosition.longitude >= endPosition.longitude)
+            return (float) (Math.toDegrees(Math.atan(lng/lat))+180);
+        else if (startPosition.latitude < endPosition.latitude && startPosition.longitude < endPosition.longitude)
+            return (float) ((90-Math.toDegrees(Math.atan(lng/lat)))+270);
+
+        return -1;
+    }
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -228,7 +250,7 @@ public class DriverHome extends AppCompatActivity
         TextView txtStars = (TextView)navigationHeadrView.findViewById(R.id.txtStars);
         ImageView imageAvatar = (ImageView)navigationHeadrView.findViewById(R.id.image_avatar);
 
-        txtName.setText(common.correntUberDriver.getNome());
+        txtName.setText(common.correntUberDriver.getName());
         txtStars.setText(common.correntUberDriver.getRates());
 
         if(common.correntUberDriver.getAvatarUrl() !=null
@@ -243,6 +265,47 @@ public class DriverHome extends AppCompatActivity
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+
+        //int view
+        location_switch = (MaterialAnimatedSwitch)findViewById(R.id.location_switch);
+        location_switch.setOnCheckedChangeListener(new MaterialAnimatedSwitch.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(boolean isOnline) {
+                if(isOnline){
+                    FirebaseDatabase.getInstance().goOnline();
+
+                    if(ActivityCompat.checkSelfPermission(DriverHome.this, android.Manifest.permission.ACCESS_COARSE_LOCATION)!= PackageManager.PERMISSION_GRANTED &&
+                            ActivityCompat.checkSelfPermission(DriverHome.this, android.Manifest.permission.ACCESS_FINE_LOCATION)!= PackageManager.PERMISSION_GRANTED ){
+                        return;
+                    }
+
+                    buildLocationRequest();
+                    buildLocationCallBack();
+                    fusedLocationProviderClient.requestLocationUpdates(mLocationRequest, locationCallback, Looper.myLooper());
+
+                    //Geo fire
+                    drivers = FirebaseDatabase.getInstance().getReference(common.driver_tbl).child(common.correntUberDriver.getCarType());
+                    geoFire = new GeoFire(drivers);
+                    displayLocation();
+
+                    Snackbar.make(mapFragment.getView(), "Estas Online", Snackbar.LENGTH_SHORT)
+                            .show();
+                }
+                else{
+                    FirebaseDatabase.getInstance().goOffline();
+
+                    fusedLocationProviderClient.removeLocationUpdates(locationCallback);
+                    mCurrent.remove();
+                    mMap.clear();
+                    handler= new Handler();
+                    if(handler != null)
+                        handler.removeCallbacks(drawPathRunnable);
+                    Snackbar.make(mapFragment.getView(), "Estas Offline", Snackbar.LENGTH_SHORT)
+                            .show();
+                }
+
+            }
+        });
 
 
         polyLineList = new ArrayList<>();
@@ -277,27 +340,10 @@ public class DriverHome extends AppCompatActivity
         });
 
 
-      //  setUpLocation();
-
         mService = common.getGoogleAPI();
 
+        setUpLocation();
         updateFirebaseToken();
-    }
-
-    private float getBearing(LatLng startPosition, LatLng endPosition) {
-        double lat = Math.abs(startPosition.latitude - endPosition.latitude);
-        double lng = Math.abs(startPosition.longitude - endPosition.longitude);
-
-        if (startPosition.latitude < endPosition.latitude && startPosition.longitude < endPosition.longitude)
-            return (float) (Math.toDegrees(Math.atan(lng/lat)));
-        else if (startPosition.latitude >=  endPosition.latitude && startPosition.longitude < endPosition.longitude)
-            return (float) ((90-Math.toDegrees(Math.atan(lng/lat)))+90);
-        else if (startPosition.latitude >= endPosition.latitude && startPosition.longitude >= endPosition.longitude)
-            return (float) (Math.toDegrees(Math.atan(lng/lat))+180);
-        else if (startPosition.latitude < endPosition.latitude && startPosition.longitude < endPosition.longitude)
-            return (float) ((90-Math.toDegrees(Math.atan(lng/lat)))+270);
-
-        return -1;
     }
 
 
@@ -306,62 +352,32 @@ public class DriverHome extends AppCompatActivity
         super.onResume();
 
         //Presense system
-        onlineRef = FirebaseDatabase.getInstance().getReference().child(".info/connected");
-        currentUserRef = FirebaseDatabase.getInstance().getReference(common.driver_tbl)
-                .child(common.correntUberDriver.getCarType())
-                .child(FirebaseAuth.getInstance().getCurrentUser().getUid());
-        onlineRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                currentUserRef.onDisconnect().removeValue();
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
-        //int view
-        location_switch = (MaterialAnimatedSwitch)findViewById(R.id.location_switch);
-        location_switch.setOnCheckedChangeListener(new MaterialAnimatedSwitch.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(boolean isOnline) {
-
-                if(isOnline){
-                    FirebaseDatabase.getInstance().goOnline();
-
-                    if(ActivityCompat.checkSelfPermission(DriverHome.this, android.Manifest.permission.ACCESS_COARSE_LOCATION)!= PackageManager.PERMISSION_GRANTED &&
-                            ActivityCompat.checkSelfPermission(DriverHome.this, android.Manifest.permission.ACCESS_FINE_LOCATION)!= PackageManager.PERMISSION_GRANTED ){
-                        return;
-                    }
-
-                    buildLocationRequest();
-                    buildLocationCallBack();
-                    fusedLocationProviderClient.requestLocationUpdates(mLocationRequest, locationCallback, Looper.myLooper());
-
-                    //Geo fire
-                    drivers = FirebaseDatabase.getInstance().getReference(common.driver_tbl).child(common.correntUberDriver.getCarType());
-                    geoFire = new GeoFire(drivers);
-                    displayLocation();
-
-                    Snackbar.make(mapFragment.getView(), "Estas Online", Snackbar.LENGTH_SHORT)
-                            .show();
-                }
-                else{
-                    FirebaseDatabase.getInstance().goOffline();
-
-                    fusedLocationProviderClient.removeLocationUpdates(locationCallback);
-                    mCurrent.remove();
-                    mMap.clear();
-                    handler= new Handler();
-                    handler.removeCallbacks(drawPathRunnable);
-                    Snackbar.make(mapFragment.getView(), "Estas Offline", Snackbar.LENGTH_SHORT)
-                            .show();
+    AccountKit.getCurrentAccount(new AccountKitCallback<Account>() {
+        @Override
+        public void onSuccess(Account account) {
+            onlineRef = FirebaseDatabase.getInstance().getReference().child(".info/connected");
+            currentUserRef = FirebaseDatabase.getInstance().getReference(common.driver_tbl)
+                    .child(common.correntUberDriver.getCarType())
+                    .child(account.getId());
+            onlineRef.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    currentUserRef.onDisconnect().removeValue();
                 }
 
-            }
-        });
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }
+
+        @Override
+        public void onError(AccountKitError accountKitError) {
+
+        }
+    });
+
     }
 
     @Override
@@ -372,18 +388,31 @@ public class DriverHome extends AppCompatActivity
         fusedLocationProviderClient.removeLocationUpdates(locationCallback);
         mCurrent.remove();
         mMap.clear();
-        handler= new Handler();
-        handler.removeCallbacks(drawPathRunnable);
+        if(handler !=null)
+            handler.removeCallbacks(drawPathRunnable);
+
         super.onDestroy();
     }
 
     private void updateFirebaseToken() {
-        FirebaseDatabase db = FirebaseDatabase.getInstance();
-        DatabaseReference tokens = db.getReference(common.token_tbl);
 
-        Token token = new Token(FirebaseInstanceId.getInstance().getToken());
-        tokens.child(FirebaseAuth.getInstance().getCurrentUser().getUid())
-                .setValue(token);
+        AccountKit.getCurrentAccount(new AccountKitCallback<Account>() {
+            @Override
+            public void onSuccess(Account account) {
+                FirebaseDatabase db = FirebaseDatabase.getInstance();
+                DatabaseReference tokens = db.getReference(common.token_tbl);
+
+
+                Token token = new Token(FirebaseInstanceId.getInstance().getToken());
+                tokens.child(account.getId())
+                        .setValue(token);
+            }
+
+            @Override
+            public void onError(AccountKitError accountKitError) {
+
+            }
+        });
     }
 
     private void getDirection() {
@@ -391,12 +420,11 @@ public class DriverHome extends AppCompatActivity
 
         String requestAPI = null;
         try{
-            requestAPI = "https://maps.googleapis.com/maps/api/direction/json?"+
-                    "mode=driving&"+
-                    "transit_routing_preference=less_driving&"+
-                    "origin="+currentPosition.latitude+","+currentPosition.longitude+"&"+
-                    "destination="+destination+"&"+
-                    "key="+getResources().getString(R.string.google_direction_api);
+            requestAPI = "https://maps.googleapis.com/maps/api/directions/json?"
+                    +"mode=driving&"+"transit_routing_preference=less_driving&"
+                    +"origin="+currentPosition.latitude+","+currentPosition.longitude+"&"
+                    +"destination="+destination+"&"
+                    +"key="+getResources().getString(R.string.google_direction_api);
 
             Log.d("Eunencio", requestAPI);
             mService.getPath(requestAPI)
@@ -409,7 +437,7 @@ public class DriverHome extends AppCompatActivity
                                 for (int i=0;i<jsonArray.length();i++)
                                 {
                                     JSONObject route = jsonArray.getJSONObject(i);
-                                    JSONObject poly = route.getJSONObject("overview_polylines");
+                                    JSONObject poly = route.getJSONObject("overview_polyline");
                                     String polyline = poly.getString("points");
                                     polyLineList = decodePoly(polyline);
                                 }
@@ -582,7 +610,7 @@ public class DriverHome extends AppCompatActivity
 
     }
 
-    private void displayLocation() {
+    private void  displayLocation() {
         if(ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION)!= PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)!= PackageManager.PERMISSION_GRANTED ){
             return;
@@ -614,19 +642,30 @@ public class DriverHome extends AppCompatActivity
                                 places.setFilter(typeFilter);
 
                                 //UpDate no FireBase
-                                geoFire.setLocation(FirebaseAuth.getInstance().getCurrentUser().getUid(), new GeoLocation(latitude, longetude), new GeoFire.CompletionListener() {
+                                AccountKit.getCurrentAccount(new AccountKitCallback<Account>() {
                                     @Override
-                                    public void onComplete(String key, DatabaseError error) {
-                                        //Adicionar Marcador
-                                        if(mCurrent != null)
-                                            mCurrent.remove();//remove o marcador pronto
-                                        mCurrent = mMap.addMarker(new MarkerOptions()
-                                                .position(new LatLng(latitude, longetude))
-                                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker))
-                                                .title("Sua Localizacao"));
+                                    public void onSuccess(Account account) {
 
-                                        //Mover a camera para esta posicao
-                                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longetude),15.0f));
+                                        geoFire.setLocation(account.getId(), new GeoLocation(latitude, longetude), new GeoFire.CompletionListener() {
+                                            @Override
+                                            public void onComplete(String key, DatabaseError error) {
+                                                //Adicionar Marcador
+                                                if(mCurrent != null)
+                                                    mCurrent.remove();//remove o marcador pronto
+                                                mCurrent = mMap.addMarker(new MarkerOptions()
+                                                        .position(new LatLng(latitude, longetude))
+                                                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker))
+                                                        .title("Sua Localizacao"));
+
+                                                //Mover a camera para esta posicao
+                                                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longetude),15.0f));
+
+                                            }
+                                        });
+                                    }
+
+                                    @Override
+                                    public void onError(AccountKitError accountKitError) {
 
                                     }
                                 });
@@ -696,10 +735,7 @@ public class DriverHome extends AppCompatActivity
         } else if (id == R.id.nav_setting) {
 
         }
-        else if (id == R.id.nav_change_pwd) {
-            showDialogChangePwd();
 
-        }
         else if (id == R.id.nav_sign_out) {
 
             singOut();
@@ -742,46 +778,60 @@ public class DriverHome extends AppCompatActivity
                 waitingDialog.show();
 
 
-                Map<String, Object> updateInfo = new HashMap<String, Object>();
-               if(rdi_Txopela.isChecked())
-                   updateInfo.put("carType", rdi_Txopela.getText().toString());
-               else
-               if(rdi_Taxi.isChecked())
-                   updateInfo.put("carType", rdi_Taxi.getText().toString());
 
-                DatabaseReference driverInformation = FirebaseDatabase.getInstance().getReference(common.user_driver_tbl);
-                driverInformation.child(FirebaseAuth.getInstance().getCurrentUser().getUid())
-                        .updateChildren(updateInfo)
-                        .addOnCompleteListener(new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task) {
-                                if(task.isSuccessful()) {
+            AccountKit.getCurrentAccount(new AccountKitCallback<Account>() {
+                @Override
+                public void onSuccess(final Account account) {
 
-                                    currentUserRef = FirebaseDatabase.getInstance().getReference(common.driver_tbl)
-                                            .child(common.correntUberDriver.getCarType())
-                                            .child(FirebaseAuth.getInstance().getCurrentUser().getUid());
+                    Map<String, Object> updateInfo = new HashMap<String, Object>();
+                    if(rdi_Txopela.isChecked())
+                        updateInfo.put("carType", rdi_Txopela.getText().toString());
+                    else
+                    if(rdi_Taxi.isChecked())
+                        updateInfo.put("carType", rdi_Taxi.getText().toString());
 
-                                    Toast.makeText(DriverHome.this, "Vehicle Type Updated !", Toast.LENGTH_SHORT).show();
+                    DatabaseReference driverInformation = FirebaseDatabase.getInstance().getReference(common.user_driver_tbl);
+                    driverInformation.child(account.getId())
+                            .updateChildren(updateInfo)
+                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if(task.isSuccessful()) {
+
+                                        currentUserRef = FirebaseDatabase.getInstance().getReference(common.driver_tbl)
+                                                .child(common.correntUberDriver.getCarType())
+                                                .child(account.getId());
+
+                                        Toast.makeText(DriverHome.this, "Vehicle Type Updated !", Toast.LENGTH_SHORT).show();
+                                    }
+                                    else
+                                        Toast.makeText(DriverHome.this, "Vehicle Type Updated Failed !", Toast.LENGTH_SHORT).show();
+
+                                    waitingDialog.dismiss();
                                 }
-                                else
-                                    Toast.makeText(DriverHome.this, "Vehicle Type Updated Failed !", Toast.LENGTH_SHORT).show();
+                            });
 
-                                waitingDialog.dismiss();
-                            }
-                        });
-                //refresh driver data 34(10:40)
-                driverInformation.child(FirebaseAuth.getInstance().getCurrentUser().getUid())
-                        .addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                common.correntUberDriver = dataSnapshot.getValue(UberDriver.class);
-                            }
+                    //refresh driver data 34(10:40)
+                    driverInformation.child(account.getId())
+                            .addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    common.correntUberDriver = dataSnapshot.getValue(UberDriver.class);
+                                }
 
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
 
-                            }
-                        });
+                                }
+                            });
+                }
+
+                @Override
+                public void onError(AccountKitError accountKitError) {
+
+                }
+            });
+
             }
         });
 
@@ -823,30 +873,42 @@ public class DriverHome extends AppCompatActivity
                 final android.app.AlertDialog waitingDialog = new SpotsDialog(DriverHome.this);
                 waitingDialog.show();
 
-                String name = edtName.getText().toString();
-                String phone = edtPhone.getText().toString();
-
-                Map<String, Object> updateInfo = new HashMap<String, Object>();
-                if(!TextUtils.isEmpty(name))
-                    updateInfo.put("name", name);
-                if(!TextUtils.isEmpty(phone))
-                    updateInfo.put("phone", name);
 
 
-                DatabaseReference driverInformation = FirebaseDatabase.getInstance().getReference(common.user_driver_tbl);
-                driverInformation.child(FirebaseAuth.getInstance().getCurrentUser().getUid())
-                        .updateChildren(updateInfo)
-                        .addOnCompleteListener(new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task) {
-                                if(task.isSuccessful())
-                                    Toast.makeText(DriverHome.this, "Information Updated !", Toast.LENGTH_SHORT).show();
-                                else
-                                    Toast.makeText(DriverHome.this, "Information Updated Failed !", Toast.LENGTH_SHORT).show();
+               AccountKit.getCurrentAccount(new AccountKitCallback<Account>() {
+                   @Override
+                   public void onSuccess(Account account) {
 
-                                waitingDialog.dismiss();
-                            }
-                        });
+                       String name = edtName.getText().toString();
+                       String phone = edtPhone.getText().toString();
+
+                       Map<String, Object> updateInfo = new HashMap<String, Object>();
+                       if(!TextUtils.isEmpty(name))
+                           updateInfo.put("name", name);
+                       if(!TextUtils.isEmpty(phone))
+                           updateInfo.put("phone", name);
+
+                       DatabaseReference driverInformation = FirebaseDatabase.getInstance().getReference(common.user_driver_tbl);
+                       driverInformation.child(account.getId())
+                               .updateChildren(updateInfo)
+                               .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                   @Override
+                                   public void onComplete(@NonNull Task<Void> task) {
+                                       if(task.isSuccessful())
+                                           Toast.makeText(DriverHome.this, "Information Updated !", Toast.LENGTH_SHORT).show();
+                                       else
+                                           Toast.makeText(DriverHome.this, "Information Updated Failed !", Toast.LENGTH_SHORT).show();
+
+                                       waitingDialog.dismiss();
+                                   }
+                               });
+                   }
+
+                   @Override
+                   public void onError(AccountKitError accountKitError) {
+
+                   }
+               });
             }
         });
 
@@ -890,24 +952,34 @@ public class DriverHome extends AppCompatActivity
 
                                 imageFolder.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                                     @Override
-                                    public void onSuccess(Uri uri) {
-                                        //update this ural to avatar
-                                        Map<String, Object> avatarUpdata = new HashMap<String, Object>();
-                                        avatarUpdata.put("avatarUrl", uri.toString());
+                                    public void onSuccess(final Uri uri) {
+                                        AccountKit.getCurrentAccount(new AccountKitCallback<Account>() {
+                                            @Override
+                                            public void onSuccess(Account account) {
+                                                //update this ural to avatar
+                                                Map<String, Object> avatarUpdata = new HashMap<String, Object>();
+                                                avatarUpdata.put("avatarUrl", uri.toString());
 
-                                        DatabaseReference driverInformation = FirebaseDatabase.getInstance().getReference(common.user_driver_tbl);
-                                        driverInformation.child(FirebaseAuth.getInstance().getCurrentUser().getUid())
-                                                .updateChildren(avatarUpdata)
-                                                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                    @Override
-                                                    public void onComplete(@NonNull Task<Void> task) {
-                                                        if(task.isSuccessful())
-                                                            Toast.makeText(DriverHome.this, "Uploaded !", Toast.LENGTH_SHORT).show();
-                                                        else
-                                                            Toast.makeText(DriverHome.this, "Upload error !", Toast.LENGTH_SHORT).show();
+                                                DatabaseReference driverInformation = FirebaseDatabase.getInstance().getReference(common.user_driver_tbl);
+                                                driverInformation.child(account.getId())
+                                                        .updateChildren(avatarUpdata)
+                                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                            @Override
+                                                            public void onComplete(@NonNull Task<Void> task) {
+                                                                if(task.isSuccessful())
+                                                                    Toast.makeText(DriverHome.this, "Uploaded !", Toast.LENGTH_SHORT).show();
+                                                                else
+                                                                    Toast.makeText(DriverHome.this, "Upload error !", Toast.LENGTH_SHORT).show();
 
-                                                    }
-                                                });
+                                                            }
+                                                        });
+                                            }
+
+                                            @Override
+                                            public void onError(AccountKitError accountKitError) {
+
+                                            }
+                                        });
 
                                     }
                                 });
@@ -965,26 +1037,37 @@ public class DriverHome extends AppCompatActivity
                                                     public void onComplete(@NonNull Task<Void> task) {
                                                         if(task.isSuccessful())
                                                         {
-                                                            //Update driver informaton column
-                                                            Map<String, Object> password = new HashMap<String, Object>();
 
-                                                            password.put("password", edtRepeatPassword.getText().toString());
+                                                                AccountKit.getCurrentAccount(new AccountKitCallback<Account>() {
+                                                                    @Override
+                                                                    public void onSuccess(Account account) {
+                                                                        //Update driver informaton column
+                                                                        Map<String, Object> password = new HashMap<String, Object>();
 
-                                                            DatabaseReference driverInfromation = FirebaseDatabase.getInstance().getReference(common.user_driver_tbl);
+                                                                        password.put("password", edtRepeatPassword.getText().toString());
 
-                                                            driverInfromation.child(FirebaseAuth.getInstance().getCurrentUser().getUid())
-                                                                    .updateChildren(password)
-                                                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                        @Override
-                                                                        public void onComplete(@NonNull Task<Void> task) {
-                                                                            if(task.isSuccessful())
-                                                                                Toast.makeText(DriverHome.this, "Password Alterado", Toast.LENGTH_SHORT).show();
-                                                                            else
-                                                                                Toast.makeText(DriverHome.this,"Password Alterado mas sem atualizar as informacoes", Toast.LENGTH_SHORT).show();
+                                                                        DatabaseReference driverInfromation = FirebaseDatabase.getInstance().getReference(common.user_driver_tbl);
 
-                                                                            waitingDialog.dismiss();
-                                                                        }
-                                                                    });
+                                                                        driverInfromation.child(account.getId())
+                                                                                .updateChildren(password)
+                                                                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                                    @Override
+                                                                                    public void onComplete(@NonNull Task<Void> task) {
+                                                                                        if(task.isSuccessful())
+                                                                                            Toast.makeText(DriverHome.this, "Password Alterado", Toast.LENGTH_SHORT).show();
+                                                                                        else
+                                                                                            Toast.makeText(DriverHome.this,"Password Alterado mas sem atualizar as informacoes", Toast.LENGTH_SHORT).show();
+
+                                                                                        waitingDialog.dismiss();
+                                                                                    }
+                                                                                });
+                                                                    }
+
+                                                                    @Override
+                                                                    public void onError(AccountKitError accountKitError) {
+
+                                                                    }
+                                                                });
                                                         }
                                                         else
                                                         {

@@ -15,10 +15,54 @@
       },
       "oauth_client": [
         {
-          "client_id": "655326028730-tq5kgjmmml1ln9dvp9vtt1hagkirs1u7.apps.googleusercontent.com",
+          "client_id": "655326028730-p0v6qrhq8u53femlsk95q6h6esgq83ln.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.example.eunenciotovele.taxigo",
+            "certificate_hash": "d190ffb6e636f2b4068aa9a4717e6b7b678f5b8c"
+          }
+        },
+        {
+          "client_id": "655326028730-bnpu1av4fun2vqt86ttpjpq3veshriin.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCmwhRUZQOqKP8Mjafn9YeAjcrNJ1Kl4nI"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "655326028730-bnpu1av4fun2vqt86ttpjpq3veshriin.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:655326028730:android:2616139ef8200b6d",
+        "android_client_info": {
+          "package_name": "tovele.eunencio.taxigocliente"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "655326028730-9sth5h5cone3fg5vjb67hgn8crkn5kl4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "tovele.eunencio.taxigocliente",
             "certificate_hash": "d190ffb6e636f2b4068aa9a4717e6b7b678f5b8c"
           }
         },

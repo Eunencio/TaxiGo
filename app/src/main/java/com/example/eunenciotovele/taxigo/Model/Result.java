@@ -7,6 +7,7 @@ public class Result {
     }
 
     public Result(String massage_id) {
+
         this.massage_id = massage_id;
     }
 
@@ -15,6 +16,7 @@ public class Result {
     }
 
     public void setMassage_id(String massage_id) {
+
         this.massage_id = massage_id;
     }
 }

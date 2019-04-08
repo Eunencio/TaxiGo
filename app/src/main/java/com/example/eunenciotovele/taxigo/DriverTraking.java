@@ -144,9 +144,9 @@ public class DriverTraking extends FragmentActivity implements OnMapReadyCallbac
 
         String requestAPI = null;
         try{
-            requestAPI = "https://maps.googleapis.com/maps/api/direction/json?"+
-                    "mode=driving&"+
-                    "transit_routing_preference=less_driving&"+
+            requestAPI = "https://maps.googleapis.com/maps/api/directions/json?"+
+                    "mode=driving&"
+                    +"transit_routing_preference=less_driving&"+
                     "origin="+pickupLocation.getLatitude()+","+pickupLocation.getLongitude()+"&"+
                     "destination="+mLastLocation.getLatitude()+","+mLastLocation.getLongitude()+"&"+
                     "key="+getResources().getString(R.string.google_direction_api);
@@ -272,7 +272,7 @@ public class DriverTraking extends FragmentActivity implements OnMapReadyCallbac
 
         riderMarker = mMap.addCircle(new CircleOptions()
                 .center(new LatLng(Double.parseDouble(riderLat), Double.parseDouble(riderLng)))
-                .radius(10)
+                .radius(50)
                 .strokeColor(Color.BLUE)
                 .fillColor(0x220000FF)
                 .strokeWidth(5.0f));
@@ -316,8 +316,8 @@ public class DriverTraking extends FragmentActivity implements OnMapReadyCallbac
         Sender sender = new Sender(token.getToken(), notification);*/
 
         Map<String, String> content = new HashMap<>();
-        content.put("title", "Chegada");
-        content.put("message", String.format("O Transporte chegou na sua localizacao!", common.correntUberDriver.getNome()));
+        content.put("title", "Chegou");
+        content.put("message", String.format("O Transporte chegou na sua localizacao!", common.correntUberDriver.getName()));
         DataMessage dataMessage = new DataMessage(token.getToken(), content);
 
         mFCMService.sendMessage(dataMessage).enqueue(new Callback<FCMResponse>() {
@@ -399,12 +399,12 @@ public class DriverTraking extends FragmentActivity implements OnMapReadyCallbac
 
         String requestAPI = null;
         try{
-            requestAPI = "https://maps.googleapis.com/maps/api/direction/json?"+
-                    "mode=driving&"+
-                    "transit_routing_preference=less_driving&"+
-                    "origin="+currentPosition.latitude+","+currentPosition.longitude+"&"+
-                    "destination="+riderLat+","+riderLng+"&"+
-                    "key="+getResources().getString(R.string.google_direction_api);
+            requestAPI = "https://maps.googleapis.com/maps/api/directions/json?"+
+                    "mode=driving&"
+                    +"transit_routing_preference=less_driving&"
+                    +"origin="+currentPosition.latitude+","+currentPosition.longitude+"&"
+                    +"destination="+riderLat+","+riderLng+"&"
+                    +"key="+getResources().getString(R.string.google_direction_api);
 
             Log.d("Eunencio", requestAPI);
             mService.getPath(requestAPI)
@@ -501,8 +501,8 @@ public class DriverTraking extends FragmentActivity implements OnMapReadyCallbac
         protected void onPostExecute(List<List<HashMap<String, String>>> lists) {
             mDialog.dismiss();
 
-            ArrayList points = null;
-            PolylineOptions polylinesOptions = null;
+            ArrayList<LatLng> points = new ArrayList<LatLng>();
+            PolylineOptions polylinesOptions = new PolylineOptions();
 
             for(int i=0; i<lists.size(); i++)
             {
@@ -526,6 +526,7 @@ public class DriverTraking extends FragmentActivity implements OnMapReadyCallbac
                 polylinesOptions.color(Color.RED);
                 polylinesOptions.geodesic(true);
             }
+            if(points.size()!=0)
             direction = mMap.addPolyline(polylinesOptions);
         }
     }

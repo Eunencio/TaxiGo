@@ -19,10 +19,6 @@
             android:title="SETTING" />
 
         <item
-            android:id="@+id/nav_change_pwd"
-            android:title="CHANGE PASSWORD" />
-
-        <item
             android:id="@+id/nav_sign_out"
             android:title="SIGN OUT" />
     </group>

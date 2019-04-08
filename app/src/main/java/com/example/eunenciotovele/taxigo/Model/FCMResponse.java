@@ -7,17 +7,17 @@ public class FCMResponse {
     public int success;
     public int failure;
     public int canonical_ids;
-    public List<Result> result;
+    public List<Result> results;
 
     public FCMResponse() {
     }
 
-    public FCMResponse(long multicast_id, int success, int failure, int canonical_ids, List<Result> result) {
+    public FCMResponse(long multicast_id, int success, int failure, int canonical_ids, List<Result> results) {
         this.multicast_id = multicast_id;
         this.success = success;
         this.failure = failure;
         this.canonical_ids = canonical_ids;
-        this.result = result;
+        this.results = results;
     }
 
     public long getMulticast_id() {
@@ -52,11 +52,11 @@ public class FCMResponse {
         this.canonical_ids = canonical_ids;
     }
 
-    public List<Result> getResult() {
-        return result;
+    public List<Result> getResults() {
+        return results;
     }
 
-    public void setResult(List<Result> result) {
-        this.result = result;
+    public void setResults(List<Result> results) {
+        this.results = results;
     }
 }

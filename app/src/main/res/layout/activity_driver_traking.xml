@@ -18,7 +18,7 @@
 
     <Button
         android:id="@+id/btnStartTrip"
-        android:text="começar a viagem"
+        android:text="COMECAR A VIAGEM"
         android:enabled="false"
         android:layout_alignParentBottom="true"
         android:background="@drawable/btn_sign_in_background"

@@ -100,9 +100,9 @@ public class CustommerCall extends AppCompatActivity {
     private void startTimer() {
         CountDownTimer countDownTimer = new CountDownTimer(30000, 1000) {
             @Override
-            public void onTick(long millisUntilFinished) {
+            public void onTick(long l) {
 
-                txtCountDown.setText(String.valueOf(1/1000));
+                txtCountDown.setText(String.valueOf(l/1000));
             }
 
             @Override
@@ -124,7 +124,7 @@ public class CustommerCall extends AppCompatActivity {
 */
 
         Map<String, String> content = new HashMap<>();
-        content.put("title", "cancel");
+        content.put("title", "Cancel");
         content.put("message", "A sua Solicitacao foi rejeitada!");
         DataMessage dataMessage = new DataMessage(token.getToken(), content);
 
@@ -151,12 +151,11 @@ public class CustommerCall extends AppCompatActivity {
 
         String requestAPI = null;
         try{
-            requestAPI = "https://maps.googleapis.com/maps/api/direction/json?"+
-                    "mode=driving&"+
-                    "transit_routing_preference=less_driving&"+
-                    "origin="+ common.mLastLocation.getLatitude()+","+common.mLastLocation.getLongitude()+"&"+
-                    "destination="+lat+","+lng+"&"+
-                    "key="+getResources().getString(R.string.google_direction_api);
+            requestAPI = "https://maps.googleapis.com/maps/api/directions/json?"
+                    +"mode=driving&"+"transit_routing_preference=less_driving&"
+                    +"origin="+ common.mLastLocation.getLatitude()+","+common.mLastLocation.getLongitude()+"&"
+                    +"destination="+lat+","+lng+"&"
+                    +"key="+getResources().getString(R.string.google_direction_api);
 
             Log.d("Eunencio", requestAPI);
             mService.getPath(requestAPI)
@@ -180,7 +179,7 @@ public class CustommerCall extends AppCompatActivity {
                                 JSONObject time = legsObject.getJSONObject("duration");
                                 txtTime.setText(time.getString("text"));
 
-                                String address = legsObject.getString("end_adrress");
+                                String address = legsObject.getString("end_address");
                                 txtAddress.setText(address);
 
                             } catch (JSONException e) {

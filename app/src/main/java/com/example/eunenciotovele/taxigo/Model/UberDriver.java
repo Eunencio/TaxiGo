@@ -1,28 +1,52 @@
 package com.example.eunenciotovele.taxigo.Model;
 
 public class UberDriver {
-    private String email, password, nome, telefone, avatarUrl, rates, carType;
+    private String email, password, name, phone, avatarUrl, rates, carType;
 
     public UberDriver(){
 
     }
 
-    public UberDriver(String email, String password, String nome, String telefone, String avatarUrl, String rates, String carType) {
+    public UberDriver(String email, String password, String name, String phone, String avatarUrl, String rates, String carType) {
         this.email = email;
         this.password = password;
-        this.nome = nome;
-        this.telefone = telefone;
+        this.name = name;
+        this.phone = phone;
         this.avatarUrl = avatarUrl;
         this.rates = rates;
         this.carType = carType;
     }
 
-    public String getRates() {
-        return rates;
+    public String getEmail() {
+        return email;
     }
 
-    public void setRates(String rates) {
-        this.rates = rates;
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     public String getAvatarUrl() {
@@ -33,45 +57,13 @@ public class UberDriver {
         this.avatarUrl = avatarUrl;
     }
 
-    public String getEmail() {
-        return email;
+    public String getRates() {
+        return rates;
     }
 
-    public void setEmail(String email) {
-
-        this.email = email;
+    public void setRates(String rates) {
+        this.rates = rates;
     }
-
-    public String getPassword() {
-
-        return password;
-    }
-
-    public void setPassword(String password) {
-
-        this.password = password;
-    }
-
-    public String getNome() {
-
-        return nome;
-    }
-
-    public void setNome(String nome) {
-
-        this.nome = nome;
-    }
-
-    public String getTelefone() {
-
-        return telefone;
-    }
-
-    public void setTelefone(String telefone) {
-
-        this.telefone = telefone;
-    }
-
 
     public String getCarType() {
         return carType;
