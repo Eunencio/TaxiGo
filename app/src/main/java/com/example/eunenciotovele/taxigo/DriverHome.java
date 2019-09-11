@@ -895,9 +895,9 @@ public class DriverHome extends AppCompatActivity
                                    @Override
                                    public void onComplete(@NonNull Task<Void> task) {
                                        if(task.isSuccessful())
-                                           Toast.makeText(DriverHome.this, "Information Updated !", Toast.LENGTH_SHORT).show();
+                                           Toast.makeText(DriverHome.this, "Informacao atualizada com sucesso !", Toast.LENGTH_SHORT).show();
                                        else
-                                           Toast.makeText(DriverHome.this, "Information Updated Failed !", Toast.LENGTH_SHORT).show();
+                                           Toast.makeText(DriverHome.this, "A informacao nao foi atualizada!", Toast.LENGTH_SHORT).show();
 
                                        waitingDialog.dismiss();
                                    }
@@ -996,110 +996,7 @@ public class DriverHome extends AppCompatActivity
         }
     }
 
-    private void showDialogChangePwd() {
-        AlertDialog.Builder alertDialog = new AlertDialog.Builder(DriverHome.this);
-        alertDialog.setTitle("MUDAR PASSWORD");
-        alertDialog.setMessage("por favor insira toda informacao");
 
-        LayoutInflater inflater = this.getLayoutInflater();
-        View layout_pwd = inflater.inflate(R.layout.layout_change_pwd, null);
-
-        final MaterialEditText edtPassword = (MaterialEditText) layout_pwd.findViewById(R.id.edtPassword);
-        final MaterialEditText edtNewPassword = (MaterialEditText) layout_pwd.findViewById(R.id.edtNewPassword);
-        final MaterialEditText edtRepeatPassword = (MaterialEditText) layout_pwd.findViewById(R.id.edtRepeatPassword);
-
-        alertDialog.setView(layout_pwd);
-
-        //set Button
-        alertDialog.setPositiveButton("MUDAR PASSWORD", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-                final android.app.AlertDialog waitingDialog = new SpotsDialog(DriverHome.this);
-                waitingDialog.show();
-
-                if(edtNewPassword.getText().toString().equals(edtRepeatPassword.getText().toString()))
-                {
-                    String email = FirebaseAuth.getInstance().getCurrentUser().getEmail();
-
-                    AuthCredential credential = EmailAuthProvider.getCredential(email,edtPassword.getText().toString());
-                    FirebaseAuth.getInstance().getCurrentUser()
-                            .reauthenticate(credential)
-                            .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    if(task.isSuccessful())
-                                    {
-                                        FirebaseAuth.getInstance().getCurrentUser()
-                                                .updatePassword(edtRepeatPassword.getText().toString())
-                                                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                    @Override
-                                                    public void onComplete(@NonNull Task<Void> task) {
-                                                        if(task.isSuccessful())
-                                                        {
-
-                                                                AccountKit.getCurrentAccount(new AccountKitCallback<Account>() {
-                                                                    @Override
-                                                                    public void onSuccess(Account account) {
-                                                                        //Update driver informaton column
-                                                                        Map<String, Object> password = new HashMap<String, Object>();
-
-                                                                        password.put("password", edtRepeatPassword.getText().toString());
-
-                                                                        DatabaseReference driverInfromation = FirebaseDatabase.getInstance().getReference(common.user_driver_tbl);
-
-                                                                        driverInfromation.child(account.getId())
-                                                                                .updateChildren(password)
-                                                                                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                                    @Override
-                                                                                    public void onComplete(@NonNull Task<Void> task) {
-                                                                                        if(task.isSuccessful())
-                                                                                            Toast.makeText(DriverHome.this, "Password Alterado", Toast.LENGTH_SHORT).show();
-                                                                                        else
-                                                                                            Toast.makeText(DriverHome.this,"Password Alterado mas sem atualizar as informacoes", Toast.LENGTH_SHORT).show();
-
-                                                                                        waitingDialog.dismiss();
-                                                                                    }
-                                                                                });
-                                                                    }
-
-                                                                    @Override
-                                                                    public void onError(AccountKitError accountKitError) {
-
-                                                                    }
-                                                                });
-                                                        }
-                                                        else
-                                                        {
-                                                            Toast.makeText(DriverHome.this, "O Passwor Nao Mudou", Toast.LENGTH_SHORT).show();
-                                                        }
-                                                    }
-                                                });
-                                    }else
-                                    {
-                                        waitingDialog.dismiss();
-                                        Toast.makeText(DriverHome.this, "Antigo Password Errado", Toast.LENGTH_SHORT).show();
-                                    }
-                                }
-                            });
-                }
-                else
-                {
-                    waitingDialog.dismiss();
-                    Toast.makeText(DriverHome.this, "O Password nao corresponde!", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-
-        alertDialog.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int which) {
-                dialogInterface.dismiss();
-            }
-        });
-        alertDialog.show();
-
-    }
 
     private void singOut() {
         FirebaseAuth.getInstance().signOut();

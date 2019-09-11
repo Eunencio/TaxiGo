@@ -31,7 +31,7 @@
 
             <TextView
                 android:id="@+id/txtFee"
-                android:text="$30"
+                android:text="30mt"
                 android:textSize="50sp"
                 android:textColor="#27aa0b"
                 android:textStyle="bold"
@@ -70,7 +70,7 @@
 
                 <TextView
                     android:id="@+id/txtBaseFare"
-                    android:text="$2.55"
+                    android:text="2.55mt"
                     android:textSize="24sp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
@@ -126,7 +126,7 @@
                 android:layout_height="wrap_content">
 
                 <TextView
-                    android:text="ESTIMATIVA DE PAGAMENTO"
+                    android:text="PAGAMENTO ESTIMADO:"
                     android:textSize="20sp"
                     android:textStyle="bold"
                     android:textColor="@android:color/black"
@@ -136,7 +136,7 @@
 
                 <TextView
                     android:id="@+id/txtEstimatePayout"
-                    android:text="$10.55"
+                    android:text="10.55mt"
                     android:textColor="@android:color/black"
                     android:textSize="24sp"
                     android:layout_width="wrap_content"

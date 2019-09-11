@@ -69,9 +69,9 @@ public class TripDetail extends FragmentActivity implements OnMapReadyCallback {
             String date = String.format("%s, %d/%d", convertToDayOfWeek(calendar.get(Calendar.DAY_OF_WEEK)), calendar.get(Calendar.DAY_OF_MONTH), calendar.get(Calendar.MONTH));
             txtDate.setText(date);
 
-            txtFee.setText(String.format("$ %.2f", getIntent().getDoubleExtra("total", 0.0)));
-            txtEstimatePayout.setText(String.format("$ %.2f", getIntent().getDoubleExtra("total", 0.0)));
-            txtBaseFare.setText(String.format("$ %.2f", common.base_fare));
+            txtFee.setText(String.format("MTN %.2f", getIntent().getDoubleExtra("total", 0.0)));
+            txtEstimatePayout.setText(String.format("MTN %.2f", getIntent().getDoubleExtra("total", 0.0)));
+            txtBaseFare.setText(String.format("MTN %.2f", common.base_fare));
             txtTime.setText(String.format("%s min", getIntent().getStringExtra("time")));
             txtDistance.setText(String.format("%s km", getIntent().getStringExtra("distance")));
             txtFrom.setText(getIntent().getStringExtra("start_address"));
@@ -94,25 +94,25 @@ public class TripDetail extends FragmentActivity implements OnMapReadyCallback {
         switch (day)
         {
             case Calendar.SUNDAY:
-                return "SUNDAY";
+                return "DOMINGO";
 
             case Calendar.MONDAY:
-                return "MONDAY";
+                return "SEGUNDA";
 
             case Calendar.TUESDAY:
-                return "TUESDAY";
+                return "TERÇA";
 
             case Calendar.WEDNESDAY:
-                return "WEDNESDAY";
+                return "QUARTA";
 
             case Calendar.THURSDAY:
-                return "THURSDAY";
+                return "QUINTA";
 
             case Calendar.FRIDAY:
-                return "FRIDAY";
+                return "SEXTA";
 
             case Calendar.SATURDAY:
-                return "SATURDAY";
+                return "SABADO";
             default:
                 return "UNK";
         }

@@ -240,7 +240,7 @@ public class MainActivity extends AppCompatActivity {
                                                 user.setName(account.getPhoneNumber().toString());
                                                  user.setAvatarUrl("");
                                                 user.setRates("0.0");
-                                                user.setCarType("txopela");
+                                                user.setCarType("Txopela");
 
                                                 //Register to Firebase
                                                 users.child(account.getId())

@@ -15,11 +15,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "655326028730-p0v6qrhq8u53femlsk95q6h6esgq83ln.apps.googleusercontent.com",
+          "client_id": "655326028730-9437v9qet4pgfut34cs6eeu1tjf9jd5m.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.example.eunenciotovele.taxigo",
-            "certificate_hash": "d190ffb6e636f2b4068aa9a4717e6b7b678f5b8c"
+            "certificate_hash": "62d5e622643eb9398e4e6d669da342e5aac55ceb"
           }
         },
         {
@@ -33,20 +33,13 @@
         }
       ],
       "services": {
-        "analytics_service": {
-          "status": 1
-        },
         "appinvite_service": {
-          "status": 2,
           "other_platform_oauth_client": [
             {
               "client_id": "655326028730-bnpu1av4fun2vqt86ttpjpq3veshriin.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
-        },
-        "ads_service": {
-          "status": 2
         }
       }
     },
@@ -59,11 +52,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "655326028730-9sth5h5cone3fg5vjb67hgn8crkn5kl4.apps.googleusercontent.com",
+          "client_id": "655326028730-0lke82qgebcltqb74irsthbif6a3u50b.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "tovele.eunencio.taxigocliente",
-            "certificate_hash": "d190ffb6e636f2b4068aa9a4717e6b7b678f5b8c"
+            "certificate_hash": "62d5e622643eb9398e4e6d669da342e5aac55ceb"
           }
         },
         {
@@ -77,20 +70,13 @@
         }
       ],
       "services": {
-        "analytics_service": {
-          "status": 1
-        },
         "appinvite_service": {
-          "status": 2,
           "other_platform_oauth_client": [
             {
               "client_id": "655326028730-bnpu1av4fun2vqt86ttpjpq3veshriin.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
-        },
-        "ads_service": {
-          "status": 2
         }
       }
     }
